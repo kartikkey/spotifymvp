@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "C:\\Users\\91964\\AppData\\Local\\Temp\\claude\\D--Projects-spotify-mvp\\78939c46-af08-438a-80c3-17a28a2af643\\scratchpad\\dev.cmd",
+      "runtimeArgs": [],
+      "port": 3000,
+      "autoPort": true
+    }
+  ]
+}
