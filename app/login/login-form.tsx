@@ -1,20 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { isSignedIn, signIn } from "@/lib/session";
+import { signIn } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 
 export function LoginForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (isSignedIn()) {
-      router.replace("/discover");
-    }
-  }, [router]);
 
   function handleSignIn() {
     setLoading(true);
