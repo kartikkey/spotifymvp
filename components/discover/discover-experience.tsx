@@ -38,7 +38,7 @@ export function DiscoverExperience({
   initialProfile,
   suggestedPrompts,
 }: DiscoverExperienceProps) {
-  const { profileOpen, closeProfile } = useDiscoverUI();
+  const { profileOpen, closeProfile, setNowPlaying } = useDiscoverUI();
   const [profile, setProfile] = useState<DiscoveryProfile>(initialProfile);
   const [journey, setJourney] = useState<DiscoveryJourney | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -66,6 +66,7 @@ export function DiscoverExperience({
     setJourney(null);
     setResolvedTrackIds(new Set());
     setSavedTrackIds(new Set());
+    setNowPlaying(null, false);
     try {
       const result = await generateDiscoveryJourney(params);
       setJourney(result);
@@ -80,13 +81,24 @@ export function DiscoverExperience({
   }
 
   function handleTogglePreview(trackId: string) {
+    const track = journey?.tracks.find((t) => t.id === trackId);
+    if (!track) return;
+
     if (previewTimeout.current) {
       clearTimeout(previewTimeout.current);
       previewTimeout.current = null;
     }
+
     setPlayingTrackId((current) => {
-      if (current === trackId) return null;
-      previewTimeout.current = setTimeout(() => setPlayingTrackId(null), 8000);
+      if (current === trackId) {
+        setNowPlaying(null, false);
+        return null;
+      }
+      setNowPlaying(track, true);
+      previewTimeout.current = setTimeout(() => {
+        setPlayingTrackId(null);
+        setNowPlaying(null, false);
+      }, 8000);
       return trackId;
     });
   }
@@ -153,34 +165,40 @@ export function DiscoverExperience({
     handleSave(trackId);
     applyFeedback(trackId, "love-this");
     setResolvedTrackIds((prev) => new Set(prev).add(trackId));
-    setPlayingTrackId((current) => (current === trackId ? null : current));
+    if (playingTrackId === trackId) {
+      setPlayingTrackId(null);
+      setNowPlaying(null, false);
+    }
   }
 
   function handleSkip(trackId: string) {
     applyFeedback(trackId, "too-familiar");
     setResolvedTrackIds((prev) => new Set(prev).add(trackId));
-    setPlayingTrackId((current) => (current === trackId ? null : current));
+    if (playingTrackId === trackId) {
+      setPlayingTrackId(null);
+      setNowPlaying(null, false);
+    }
   }
 
   function handleReset() {
     setJourney(null);
     setResolvedTrackIds(new Set());
     setSavedTrackIds(new Set());
+    setPlayingTrackId(null);
+    setNowPlaying(null, false);
   }
 
   return (
     <>
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
-        <div className="flex min-w-0 flex-1 flex-col gap-8">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+        <div className="flex min-w-0 flex-1 flex-col gap-6">
           <DiscoveryCompanion
             suggestedPrompts={suggestedPrompts}
             initialExplorationLevel={profile.explorationLevel}
             initialMood={profile.currentMood}
             isGenerating={isGenerating}
             journeyActive={!!journey}
-            journeySummary={journey?.promptSummary}
             onGenerate={handleGenerate}
-            onNewJourney={handleReset}
           />
 
           <AnimatePresence mode="wait">
@@ -189,7 +207,7 @@ export function DiscoverExperience({
                 key="loading"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -8 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
               >
                 <DiscoveryJourneySkeleton />
@@ -197,10 +215,9 @@ export function DiscoverExperience({
             ) : journey ? (
               <motion.div
                 key="journey"
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
               >
                 <RecommendationJourney
                   journey={journey}
@@ -218,7 +235,7 @@ export function DiscoverExperience({
                 key="placeholder"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -8 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
                 <JourneyPlaceholder />
@@ -229,16 +246,16 @@ export function DiscoverExperience({
 
         <DiscoveryProfilePanel
           profile={profile}
-          className="hidden w-full shrink-0 lg:sticky lg:top-8 lg:flex lg:w-72"
+          className="hidden w-full shrink-0 lg:sticky lg:top-6 lg:flex lg:w-[300px]"
         />
       </div>
 
       <Sheet open={profileOpen} onOpenChange={(open) => !open && closeProfile()}>
-        <SheetContent side="right" className="w-full max-w-sm overflow-y-auto bg-surface-2 p-0">
+        <SheetContent side="right" className="w-full max-w-sm overflow-y-auto bg-surface-1 p-0">
           <SheetHeader className="border-b border-border px-5 py-4">
             <SheetTitle className="text-base font-bold text-text-primary">Your Profile</SheetTitle>
           </SheetHeader>
-          <DiscoveryProfilePanel profile={profile} className="rounded-none border-0 bg-transparent" />
+          <DiscoveryProfilePanel profile={profile} className="rounded-none bg-transparent" />
         </SheetContent>
       </Sheet>
     </>

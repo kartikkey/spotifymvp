@@ -18,6 +18,15 @@ export const RECOMMENDATION_STAGE_LABELS: Record<RecommendationStage, string> = 
   "genre-expansion": "Genre Expansion",
 };
 
+/** Reference-style uppercase stage tags shown on journey cards */
+export const RECOMMENDATION_STAGE_TAGS: Record<RecommendationStage, string> = {
+  "current-taste": "Start Here",
+  "bridge-artist": "Bridge Artist",
+  "emerging-artist": "Emerging Artist",
+  "hidden-gem": "Hidden Gem",
+  "genre-expansion": "Genre Expansion",
+};
+
 export const RECOMMENDATION_STAGE_DESCRIPTIONS: Record<RecommendationStage, string> = {
   "current-taste": "Right in your lane, matching what you already play on repeat.",
   "bridge-artist": "One step outward, connected to your taste by sound or scene.",

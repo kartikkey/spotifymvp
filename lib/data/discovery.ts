@@ -25,33 +25,33 @@ export const RECENTLY_PLAYED: RecentlyPlayedTrack[] = [
 export const SUGGESTED_PROMPTS: SuggestedPrompt[] = [
   {
     id: "prompt-01",
-    label: "Surprise me",
+    label: "Surprise me ✨",
     prompt: "Surprise me with something outside my comfort zone.",
   },
   {
     id: "prompt-02",
-    label: "Before they blow up",
-    prompt: "Find me the next artist before they blow up.",
+    label: "Chill night",
+    prompt: "Something mellow for a chill night in.",
   },
   {
     id: "prompt-03",
-    label: "Still me, but new",
-    prompt: "I want something that still feels like me, but new.",
+    label: "Late night drive",
+    prompt: "Music for a late night drive.",
   },
   {
     id: "prompt-04",
-    label: "Deep cuts only",
-    prompt: "Deep cuts only — nothing I've heard before.",
+    label: "Focus mode",
+    prompt: "Help me focus without distracting vocals.",
   },
   {
     id: "prompt-05",
-    label: "Fresh workout energy",
-    prompt: "Match my workout energy but keep it fresh.",
+    label: "Feeling indie",
+    prompt: "I'm in an indie mood today.",
   },
   {
     id: "prompt-06",
-    label: "A new genre, gently",
-    prompt: "Ease me into a genre I've never really explored.",
+    label: "Deep cuts only",
+    prompt: "Deep cuts only — nothing I've heard before.",
   },
 ];
 

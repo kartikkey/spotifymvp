@@ -30,7 +30,9 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-3">
           <Image src="/logo/spotify-mark.webp" alt="" width={40} height={40} />
           <div className="flex flex-col items-center gap-1 text-center">
-            <h1 className="text-xl font-bold tracking-tight text-text-primary">Spotify Discover</h1>
+            <h1 className="text-xl font-bold tracking-tight text-text-primary">
+              Discover<span className="text-brand-green">+</span>
+            </h1>
             <p className="text-sm text-text-secondary">Find your next favorite song</p>
           </div>
         </div>

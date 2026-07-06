@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Spotify Discover",
+  title: "Discover+ by Spotify",
   description:
     "A personalized discovery journey from what you know to what you'll love next.",
 };

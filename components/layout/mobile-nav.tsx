@@ -36,7 +36,8 @@ export function MobileNav() {
         <SheetHeader className="flex-row items-center gap-2.5 space-y-0 border-b border-sidebar-border px-4 py-3">
           <Image src="/logo/spotify-mark.webp" alt="" width={22} height={22} />
           <SheetTitle className="text-sm font-bold tracking-tight text-sidebar-foreground">
-            Spotify Discover
+            Discover<span className="text-brand-green">+</span>
+            <span className="font-normal text-sidebar-foreground/50"> by Spotify</span>
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-2 py-2">
