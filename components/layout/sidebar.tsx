@@ -7,7 +7,7 @@ import { useState } from "react";
 import { ChevronsLeft, ChevronsRight, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MOCK_USER, signOut } from "@/lib/session";
-import { NAV_ITEMS } from "./nav-items";
+import { NAV_GROUPS } from "./nav-items";
 import {
   Tooltip,
   TooltipContent,
@@ -40,51 +40,62 @@ export function Sidebar() {
         )}
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 px-2 py-2">
-        {NAV_ITEMS.map((item) => {
-          const active = pathname.startsWith(item.href);
-          const linkClassName = cn(
-            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
-            active && "bg-sidebar-accent text-sidebar-foreground",
-            collapsed && "justify-center px-0"
-          );
-          const content = (
-            <>
-              <item.icon className="size-4.5 shrink-0" strokeWidth={1.75} />
-              {!collapsed && <span className="truncate">{item.label}</span>}
-            </>
-          );
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-2 py-2">
+        {NAV_GROUPS.map((group, groupIndex) => (
+          <div key={group.label} className={cn("flex flex-col gap-1", groupIndex > 0 && "mt-3")}>
+            {!collapsed ? (
+              <span className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+                {group.label}
+              </span>
+            ) : (
+              groupIndex > 0 && <div className="mx-3 mb-1 border-t border-sidebar-border" />
+            )}
+            {group.items.map((item) => {
+              const active = pathname.startsWith(item.href);
+              const linkClassName = cn(
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                active && "bg-sidebar-accent text-sidebar-foreground",
+                collapsed && "justify-center px-0"
+              );
+              const content = (
+                <>
+                  <item.icon className="size-4.5 shrink-0" strokeWidth={1.75} />
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                </>
+              );
 
-          if (!collapsed) {
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={linkClassName}
-              >
-                {content}
-              </Link>
-            );
-          }
-
-          return (
-            <Tooltip key={item.href}>
-              <TooltipTrigger
-                render={
+              if (!collapsed) {
+                return (
                   <Link
+                    key={item.href}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={linkClassName}
-                  />
-                }
-              >
-                {content}
-              </TooltipTrigger>
-              <TooltipContent side="right">{item.label}</TooltipContent>
-            </Tooltip>
-          );
-        })}
+                  >
+                    {content}
+                  </Link>
+                );
+              }
+
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger
+                    render={
+                      <Link
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={linkClassName}
+                      />
+                    }
+                  >
+                    {content}
+                  </TooltipTrigger>
+                  <TooltipContent side="right">{item.label}</TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="flex flex-col gap-1 border-t border-sidebar-border px-2 py-2">

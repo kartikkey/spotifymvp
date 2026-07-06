@@ -1,0 +1,86 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { DiscoveryJourney, FeedbackType } from "@/lib/types";
+import { SectionHeader } from "@/components/shared/section-header";
+import { RecommendationCard } from "./recommendation-card";
+
+interface RecommendationJourneyProps {
+  journey: DiscoveryJourney;
+  playingTrackId: string | null;
+  onTogglePreview: (trackId: string) => void;
+  savedTrackIds: Set<string>;
+  onToggleSave: (trackId: string) => void;
+  feedbackByTrack: Record<string, FeedbackType[]>;
+  onFeedback: (trackId: string, type: FeedbackType) => void;
+  onReset: () => void;
+}
+
+export function RecommendationJourney({
+  journey,
+  playingTrackId,
+  onTogglePreview,
+  savedTrackIds,
+  onToggleSave,
+  feedbackByTrack,
+  onFeedback,
+  onReset,
+}: RecommendationJourneyProps) {
+  return (
+    <div className="flex flex-col gap-4">
+      <SectionHeader
+        eyebrow="Explore"
+        title="Your Discovery Journey"
+        action={
+          <button
+            type="button"
+            onClick={onReset}
+            className="flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary"
+          >
+            <RotateCcw className="size-3.5" />
+            Start over
+          </button>
+        }
+      />
+      <p className="-mt-2 text-sm text-text-secondary">{journey.promptSummary}</p>
+
+      <div className="flex flex-col">
+        {journey.tracks.map((track, index) => (
+          <motion.div
+            key={track.id}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: index * 0.12, ease: "easeOut" }}
+            className="flex gap-4"
+          >
+            <div className="flex flex-col items-center">
+              <div
+                className={cn(
+                  "flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
+                  index === 0 ? "bg-brand-green text-black" : "bg-surface-3 text-text-primary"
+                )}
+              >
+                {index + 1}
+              </div>
+              {index < journey.tracks.length - 1 ? (
+                <div className="my-1 w-px flex-1 bg-border" aria-hidden />
+              ) : null}
+            </div>
+            <RecommendationCard
+              track={track}
+              isPlaying={playingTrackId === track.id}
+              onTogglePreview={() => onTogglePreview(track.id)}
+              isSaved={savedTrackIds.has(track.id)}
+              onToggleSave={() => onToggleSave(track.id)}
+              feedbackGiven={feedbackByTrack[track.id] ?? []}
+              onFeedback={(type) => onFeedback(track.id, type)}
+              className="mb-6 flex-1"
+            />
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
