@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "./sidebar";
 import { TopBar } from "./top-bar";
-import { CommandPalette } from "./command-palette";
-import { CommandPaletteProvider } from "./command-palette-context";
+import { DiscoverUIProvider } from "@/components/discover/discover-ui-context";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <CommandPaletteProvider>
+    <DiscoverUIProvider>
       <div className="flex h-dvh w-full overflow-hidden bg-background">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
@@ -18,7 +17,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
-      <CommandPalette />
-    </CommandPaletteProvider>
+    </DiscoverUIProvider>
   );
 }

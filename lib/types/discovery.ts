@@ -67,6 +67,7 @@ export interface DiscoveryTrack {
   trackTitle: string;
   artist: string;
   genre: string;
+  year: number;
   tags: string[];
   durationSec: number;
   energy: number;

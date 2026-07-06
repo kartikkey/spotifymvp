@@ -14,6 +14,8 @@ import {
   type RecentlyPlayedTrack,
   type SuggestedPrompt,
 } from "@/lib/types";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useDiscoverUI } from "./discover-ui-context";
 import { DiscoveryCompanion } from "./discovery-companion";
 import { RecommendationJourney } from "./recommendation-journey";
 import { DiscoveryJourneySkeleton } from "./discovery-journey-skeleton";
@@ -35,14 +37,14 @@ let evolutionCounter = 0;
 export function DiscoverExperience({
   initialProfile,
   suggestedPrompts,
-  recentlyPlayed,
 }: DiscoverExperienceProps) {
+  const { profileOpen, closeProfile } = useDiscoverUI();
   const [profile, setProfile] = useState<DiscoveryProfile>(initialProfile);
   const [journey, setJourney] = useState<DiscoveryJourney | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
   const [savedTrackIds, setSavedTrackIds] = useState<Set<string>>(new Set());
-  const [feedbackByTrack, setFeedbackByTrack] = useState<Record<string, FeedbackType[]>>({});
+  const [resolvedTrackIds, setResolvedTrackIds] = useState<Set<string>>(new Set());
   const previewTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasBumpedStreak = useRef(false);
 
@@ -62,17 +64,16 @@ export function DiscoverExperience({
   async function handleGenerate(params: GenerateJourneyParams) {
     setIsGenerating(true);
     setJourney(null);
+    setResolvedTrackIds(new Set());
+    setSavedTrackIds(new Set());
     try {
       const result = await generateDiscoveryJourney(params);
       setJourney(result);
-      setProfile((prev) => {
-        const next: DiscoveryProfile = {
-          ...prev,
-          explorationLevel: params.explorationLevel,
-          currentMood: params.mood ?? prev.currentMood,
-        };
-        return next;
-      });
+      setProfile((prev) => ({
+        ...prev,
+        explorationLevel: params.explorationLevel,
+        currentMood: params.mood ?? prev.currentMood,
+      }));
     } finally {
       setIsGenerating(false);
     }
@@ -90,66 +91,39 @@ export function DiscoverExperience({
     });
   }
 
-  function handleToggleSave(trackId: string) {
+  function handleSave(trackId: string) {
     const track = journey?.tracks.find((t) => t.id === trackId);
-    if (!track) return;
+    if (!track || savedTrackIds.has(trackId)) return;
 
-    setSavedTrackIds((prev) => {
-      const next = new Set(prev);
-      const isSaving = !next.has(trackId);
-      if (isSaving) {
-        next.add(trackId);
-      } else {
-        next.delete(trackId);
+    setSavedTrackIds((prev) => new Set(prev).add(trackId));
+    setProfile((prevProfile) => {
+      const alreadyDiscovered = prevProfile.recentlyDiscovered.some((d) => d.artist === track.artist);
+      const draft: DiscoveryProfile = {
+        ...prevProfile,
+        recentlyDiscovered: alreadyDiscovered
+          ? prevProfile.recentlyDiscovered
+          : [
+              ...prevProfile.recentlyDiscovered,
+              { artist: track.artist, genre: track.genre, discoveredAt: new Date().toISOString() },
+            ],
+        discoveryStreak: hasBumpedStreak.current
+          ? prevProfile.discoveryStreak
+          : prevProfile.discoveryStreak + 1,
+      };
+      hasBumpedStreak.current = true;
+      if (!alreadyDiscovered) {
+        pushEvolution(draft, `Discovered ${track.artist}`, `Saved from a ${track.stage.replace("-", " ")} recommendation.`);
       }
-
-      if (isSaving) {
-        setProfile((prevProfile) => {
-          const alreadyDiscovered = prevProfile.recentlyDiscovered.some(
-            (d) => d.artist === track.artist
-          );
-          const draft: DiscoveryProfile = {
-            ...prevProfile,
-            recentlyDiscovered: alreadyDiscovered
-              ? prevProfile.recentlyDiscovered
-              : [
-                  ...prevProfile.recentlyDiscovered,
-                  { artist: track.artist, genre: track.genre, discoveredAt: new Date().toISOString() },
-                ],
-            discoveryStreak: hasBumpedStreak.current
-              ? prevProfile.discoveryStreak
-              : prevProfile.discoveryStreak + 1,
-          };
-          hasBumpedStreak.current = true;
-          if (!alreadyDiscovered) {
-            pushEvolution(draft, `Discovered ${track.artist}`, `Saved from a ${track.stage.replace("-", " ")} recommendation.`);
-          }
-          return draft;
-        });
-        toast.success(`Saved ${track.artist}`, {
-          description: `Added to your Discovery Profile${track.stage !== "current-taste" ? " — new artist" : ""}.`,
-        });
-      }
-
-      return next;
+      return draft;
+    });
+    toast.success(`Saved ${track.artist}`, {
+      description: "Added to your Discovery Profile.",
     });
   }
 
-  function handleFeedback(trackId: string, type: FeedbackType) {
+  function applyFeedback(trackId: string, type: FeedbackType) {
     const track = journey?.tracks.find((t) => t.id === trackId);
     if (!track) return;
-
-    const alreadyGiven = feedbackByTrack[trackId]?.includes(type) ?? false;
-
-    setFeedbackByTrack((prev) => {
-      const existing = prev[trackId] ?? [];
-      return {
-        ...prev,
-        [trackId]: alreadyGiven ? existing.filter((t) => t !== type) : [...existing, type],
-      };
-    });
-
-    if (alreadyGiven) return;
 
     setProfile((prev) => {
       const delta = FEEDBACK_EXPLORATION_DELTA[type];
@@ -171,67 +145,102 @@ export function DiscoverExperience({
     });
 
     toast(FEEDBACK_ADAPTATION_COPY[type], {
-      description: `Applied to future recommendations like "${track.trackTitle}" by ${track.artist}.`,
+      description: `Applied to future recommendations like "${track.trackTitle}".`,
     });
   }
 
-  return (
-    <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-10">
-      <div className="flex min-w-0 flex-1 flex-col gap-12">
-        <DiscoveryCompanion
-          suggestedPrompts={suggestedPrompts}
-          recentlyPlayed={recentlyPlayed}
-          initialExplorationLevel={profile.explorationLevel}
-          initialMood={profile.currentMood}
-          isGenerating={isGenerating}
-          onGenerate={handleGenerate}
-        />
+  function handleKeep(trackId: string) {
+    handleSave(trackId);
+    applyFeedback(trackId, "love-this");
+    setResolvedTrackIds((prev) => new Set(prev).add(trackId));
+    setPlayingTrackId((current) => (current === trackId ? null : current));
+  }
 
-        <AnimatePresence mode="wait">
-          {isGenerating ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
-            >
-              <DiscoveryJourneySkeleton />
-            </motion.div>
-          ) : journey ? (
-            <motion.div
-              key="journey"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <RecommendationJourney
-                journey={journey}
-                playingTrackId={playingTrackId}
-                onTogglePreview={handleTogglePreview}
-                savedTrackIds={savedTrackIds}
-                onToggleSave={handleToggleSave}
-                feedbackByTrack={feedbackByTrack}
-                onFeedback={handleFeedback}
-                onReset={() => setJourney(null)}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="placeholder"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
-            >
-              <JourneyPlaceholder />
-            </motion.div>
-          )}
-        </AnimatePresence>
+  function handleSkip(trackId: string) {
+    applyFeedback(trackId, "too-familiar");
+    setResolvedTrackIds((prev) => new Set(prev).add(trackId));
+    setPlayingTrackId((current) => (current === trackId ? null : current));
+  }
+
+  function handleReset() {
+    setJourney(null);
+    setResolvedTrackIds(new Set());
+    setSavedTrackIds(new Set());
+  }
+
+  return (
+    <>
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
+        <div className="flex min-w-0 flex-1 flex-col gap-8">
+          <DiscoveryCompanion
+            suggestedPrompts={suggestedPrompts}
+            initialExplorationLevel={profile.explorationLevel}
+            initialMood={profile.currentMood}
+            isGenerating={isGenerating}
+            journeyActive={!!journey}
+            journeySummary={journey?.promptSummary}
+            onGenerate={handleGenerate}
+            onNewJourney={handleReset}
+          />
+
+          <AnimatePresence mode="wait">
+            {isGenerating ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+              >
+                <DiscoveryJourneySkeleton />
+              </motion.div>
+            ) : journey ? (
+              <motion.div
+                key="journey"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <RecommendationJourney
+                  journey={journey}
+                  playingTrackId={playingTrackId}
+                  resolvedTrackIds={resolvedTrackIds}
+                  savedTrackIds={savedTrackIds}
+                  onTogglePreview={handleTogglePreview}
+                  onKeep={handleKeep}
+                  onSkip={handleSkip}
+                  onReset={handleReset}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="placeholder"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3 }}
+              >
+                <JourneyPlaceholder />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <DiscoveryProfilePanel
+          profile={profile}
+          className="hidden w-full shrink-0 lg:sticky lg:top-8 lg:flex lg:w-72"
+        />
       </div>
 
-      <DiscoveryProfilePanel profile={profile} className="w-full shrink-0 lg:sticky lg:top-8 lg:w-80" />
-    </div>
+      <Sheet open={profileOpen} onOpenChange={(open) => !open && closeProfile()}>
+        <SheetContent side="right" className="w-full max-w-sm overflow-y-auto bg-surface-2 p-0">
+          <SheetHeader className="border-b border-border px-5 py-4">
+            <SheetTitle className="text-base font-bold text-text-primary">Your Profile</SheetTitle>
+          </SheetHeader>
+          <DiscoveryProfilePanel profile={profile} className="rounded-none border-0 bg-transparent" />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

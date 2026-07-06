@@ -2,53 +2,41 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUp, Loader2, Sparkles } from "lucide-react";
+import { ArrowUp, Loader2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  ACTIVITY_CHIPS,
-  MOOD_CHIPS,
-  type ActivityChip,
-  type GenerateJourneyParams,
-  type MoodChip,
-  type RecentlyPlayedTrack,
-  type SuggestedPrompt,
-} from "@/lib/types";
-import { FilterChip } from "@/components/shared/filter-chip";
-import { Slider } from "@/components/ui/slider";
+import type { GenerateJourneyParams, MoodChip, SuggestedPrompt } from "@/lib/types";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import { RecentlyPlayedRow } from "./recently-played-row";
+import { RefineJourneyPanel } from "./refine-journey-panel";
 
 interface DiscoveryCompanionProps {
   suggestedPrompts: SuggestedPrompt[];
-  recentlyPlayed: RecentlyPlayedTrack[];
   initialExplorationLevel: number;
   initialMood: MoodChip;
   isGenerating: boolean;
+  journeyActive: boolean;
+  journeySummary?: string;
   onGenerate: (params: GenerateJourneyParams) => void;
-}
-
-function explorationCopy(level: number): string {
-  if (level >= 70) return "Adventurous — mostly new ground";
-  if (level >= 40) return "Balanced — familiar and new";
-  return "Comfort zone — close to what you know";
+  onNewJourney: () => void;
 }
 
 export function DiscoveryCompanion({
   suggestedPrompts,
-  recentlyPlayed,
   initialExplorationLevel,
   initialMood,
   isGenerating,
+  journeyActive,
+  journeySummary,
   onGenerate,
+  onNewJourney,
 }: DiscoveryCompanionProps) {
   const [prompt, setPrompt] = useState("");
   const [mood, setMood] = useState<MoodChip | undefined>(initialMood);
-  const [activity, setActivity] = useState<ActivityChip | undefined>(undefined);
+  const [activity, setActivity] = useState<GenerateJourneyParams["activity"]>(undefined);
   const [explorationLevel, setExplorationLevel] = useState(initialExplorationLevel);
 
   function handleSubmit() {
@@ -61,26 +49,36 @@ export function DiscoveryCompanion({
     });
   }
 
+  if (journeyActive && journeySummary) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: "auto" }}
+        className="flex items-center justify-between gap-4 rounded-md bg-surface-1 px-4 py-3"
+      >
+        <p className="min-w-0 truncate text-sm text-text-secondary">{journeySummary}</p>
+        <button
+          type="button"
+          onClick={onNewJourney}
+          className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-text-secondary transition-colors hover:text-text-primary"
+        >
+          <RotateCcw className="size-3.5" />
+          New journey
+        </button>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="discover-section-gap"
+      className="flex flex-col gap-6"
     >
-      <div className="flex flex-col gap-2.5">
-        <span className="discover-overline-accent flex items-center gap-1.5">
-          <Sparkles className="size-3.5" strokeWidth={2} />
-          AI Discovery Companion
-        </span>
-        <h1 className="text-[28px] font-bold leading-tight tracking-tight text-text-primary sm:text-[32px]">
-          What do you want to hear today?
-        </h1>
-        <p className="max-w-2xl text-base leading-relaxed text-text-secondary">
-          Tell me a vibe, pick a mood, or just hit generate — I&apos;ll build a discovery journey from your
-          current taste out to something you&apos;ve never heard.
-        </p>
-      </div>
+      <h1 className="text-[32px] font-bold leading-tight tracking-tight text-text-primary">
+        What do you want to hear today?
+      </h1>
 
       <InputGroup className="h-auto items-end border-border/80 bg-surface-1 px-1 py-1 transition-colors focus-within:border-brand-green/50 focus-within:ring-2 focus-within:ring-brand-green/20">
         <InputGroupTextarea
@@ -131,62 +129,14 @@ export function DiscoveryCompanion({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div className="flex flex-col gap-3">
-          <span className="discover-overline-muted">How are you feeling?</span>
-          <div className="flex flex-wrap gap-1.5">
-            {MOOD_CHIPS.map((chip) => (
-              <FilterChip
-                key={chip}
-                label={chip}
-                active={mood === chip}
-                onClick={() => setMood((prev) => (prev === chip ? undefined : chip))}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <span className="discover-overline-muted">What are you doing?</span>
-          <div className="flex flex-wrap gap-1.5">
-            {ACTIVITY_CHIPS.map((chip) => (
-              <FilterChip
-                key={chip}
-                label={chip}
-                active={activity === chip}
-                onClick={() => setActivity((prev) => (prev === chip ? undefined : chip))}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="discover-card bg-surface-1">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <span className="discover-overline-muted">Exploration level</span>
-          <motion.span
-            key={explorationCopy(explorationLevel)}
-            initial={{ opacity: 0.5 }}
-            animate={{ opacity: 1 }}
-            className="text-xs font-medium text-text-primary"
-          >
-            {explorationCopy(explorationLevel)}
-          </motion.span>
-        </div>
-        <Slider
-          value={explorationLevel}
-          onValueChange={(value) => setExplorationLevel(value as number)}
-          min={0}
-          max={100}
-          step={5}
-        />
-        <div className="mt-2 flex items-center justify-between text-[11px] text-text-tertiary">
-          <span>Comfort zone</span>
-          <span>Adventurous</span>
-        </div>
-      </div>
-
-      <RecentlyPlayedRow tracks={recentlyPlayed} />
+      <RefineJourneyPanel
+        mood={mood}
+        activity={activity}
+        explorationLevel={explorationLevel}
+        onMoodChange={setMood}
+        onActivityChange={setActivity}
+        onExplorationChange={setExplorationLevel}
+      />
 
       <button
         type="button"
@@ -202,10 +152,7 @@ export function DiscoveryCompanion({
             Curating your journey...
           </>
         ) : (
-          <>
-            <Sparkles className="size-4" strokeWidth={2} />
-            Generate my discovery journey
-          </>
+          "Generate Journey"
         )}
       </button>
     </motion.div>

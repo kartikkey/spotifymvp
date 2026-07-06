@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Amplify | Spotify Product Intelligence",
+  title: "Spotify Discover",
   description:
-    "Internal product intelligence platform — opportunities, AI-generated insights, experiments, and voice of customer in one place.",
+    "A personalized discovery journey from what you know to what you'll love next.",
 };
 
 export default function RootLayout({
