@@ -18,6 +18,7 @@ import { DiscoveryCompanion } from "./discovery-companion";
 import { RecommendationJourney } from "./recommendation-journey";
 import { DiscoveryJourneySkeleton } from "./discovery-journey-skeleton";
 import { DiscoveryProfilePanel } from "./discovery-profile-panel";
+import { JourneyPlaceholder } from "./journey-placeholder";
 
 interface DiscoverExperienceProps {
   initialProfile: DiscoveryProfile;
@@ -175,8 +176,8 @@ export function DiscoverExperience({
   }
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-8">
-      <div className="flex min-w-0 flex-1 flex-col gap-10">
+    <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-10">
+      <div className="flex min-w-0 flex-1 flex-col gap-12">
         <DiscoveryCompanion
           suggestedPrompts={suggestedPrompts}
           recentlyPlayed={recentlyPlayed}
@@ -188,11 +189,23 @@ export function DiscoverExperience({
 
         <AnimatePresence mode="wait">
           {isGenerating ? (
-            <motion.div key="loading" exit={{ opacity: 0 }}>
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+            >
               <DiscoveryJourneySkeleton />
             </motion.div>
           ) : journey ? (
-            <motion.div key="journey" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <motion.div
+              key="journey"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            >
               <RecommendationJourney
                 journey={journey}
                 playingTrackId={playingTrackId}
@@ -204,7 +217,17 @@ export function DiscoverExperience({
                 onReset={() => setJourney(null)}
               />
             </motion.div>
-          ) : null}
+          ) : (
+            <motion.div
+              key="placeholder"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <JourneyPlaceholder />
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 

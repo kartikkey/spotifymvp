@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUp, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatRelativeTime } from "@/lib/utils";
 import {
   ACTIVITY_CHIPS,
   MOOD_CHIPS,
@@ -22,6 +21,7 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
+import { RecentlyPlayedRow } from "./recently-played-row";
 
 interface DiscoveryCompanionProps {
   suggestedPrompts: SuggestedPrompt[];
@@ -66,23 +66,23 @@ export function DiscoveryCompanion({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex flex-col gap-8"
+      className="discover-section-gap"
     >
-      <div className="flex flex-col gap-2">
-        <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-green">
-          <Sparkles className="size-3.5" />
+      <div className="flex flex-col gap-2.5">
+        <span className="discover-overline-accent flex items-center gap-1.5">
+          <Sparkles className="size-3.5" strokeWidth={2} />
           AI Discovery Companion
         </span>
-        <h1 className="text-2xl font-bold tracking-tight text-text-primary sm:text-[28px]">
+        <h1 className="text-[28px] font-bold leading-tight tracking-tight text-text-primary sm:text-[32px]">
           What do you want to hear today?
         </h1>
-        <p className="max-w-2xl text-sm text-text-secondary">
+        <p className="max-w-2xl text-base leading-relaxed text-text-secondary">
           Tell me a vibe, pick a mood, or just hit generate — I&apos;ll build a discovery journey from your
           current taste out to something you&apos;ve never heard.
         </p>
       </div>
 
-      <InputGroup className="h-auto items-end bg-surface-1 px-1 py-1">
+      <InputGroup className="h-auto items-end border-border/80 bg-surface-1 px-1 py-1 transition-colors focus-within:border-brand-green/50 focus-within:ring-2 focus-within:ring-brand-green/20">
         <InputGroupTextarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -94,7 +94,7 @@ export function DiscoveryCompanion({
           }}
           placeholder="Ask for a vibe, an artist, an era — anything."
           rows={1}
-          className="min-h-10 px-3 py-2"
+          className="min-h-11 px-3 py-2.5 text-sm leading-relaxed"
         />
         <InputGroupAddon align="inline-end">
           <InputGroupButton
@@ -104,12 +104,12 @@ export function DiscoveryCompanion({
             aria-label="Generate discovery journey"
             disabled={isGenerating}
             onClick={handleSubmit}
-            className="rounded-md bg-brand-green text-black hover:bg-brand-green-bright disabled:opacity-60"
+            className="rounded-full bg-brand-green text-black transition-colors hover:bg-brand-green-bright disabled:opacity-60"
           >
             {isGenerating ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
-              <ArrowUp className="size-4" />
+              <ArrowUp className="size-4" strokeWidth={2.5} />
             )}
           </InputGroupButton>
         </InputGroupAddon>
@@ -121,7 +121,10 @@ export function DiscoveryCompanion({
             key={entry.id}
             type="button"
             onClick={() => setPrompt(entry.prompt)}
-            className="inline-flex h-7 shrink-0 items-center rounded-full bg-surface-2 px-3 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-3 hover:text-text-primary"
+            className={cn(
+              "discover-chip-rest",
+              prompt === entry.prompt && "bg-surface-3 text-text-primary ring-1 ring-brand-green/30"
+            )}
           >
             {entry.label}
           </button>
@@ -129,10 +132,8 @@ export function DiscoveryCompanion({
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div className="flex flex-col gap-2.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            How are you feeling?
-          </span>
+        <div className="flex flex-col gap-3">
+          <span className="discover-overline-muted">How are you feeling?</span>
           <div className="flex flex-wrap gap-1.5">
             {MOOD_CHIPS.map((chip) => (
               <FilterChip
@@ -145,10 +146,8 @@ export function DiscoveryCompanion({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            What are you doing?
-          </span>
+        <div className="flex flex-col gap-3">
+          <span className="discover-overline-muted">What are you doing?</span>
           <div className="flex flex-wrap gap-1.5">
             {ACTIVITY_CHIPS.map((chip) => (
               <FilterChip
@@ -162,12 +161,17 @@ export function DiscoveryCompanion({
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg bg-surface-1 p-5">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            Exploration level
-          </span>
-          <span className="text-xs font-medium text-text-primary">{explorationCopy(explorationLevel)}</span>
+      <div className="discover-card bg-surface-1">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <span className="discover-overline-muted">Exploration level</span>
+          <motion.span
+            key={explorationCopy(explorationLevel)}
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+            className="text-xs font-medium text-text-primary"
+          >
+            {explorationCopy(explorationLevel)}
+          </motion.span>
         </div>
         <Slider
           value={explorationLevel}
@@ -176,36 +180,20 @@ export function DiscoveryCompanion({
           max={100}
           step={5}
         />
-        <div className="flex items-center justify-between text-[11px] text-text-tertiary">
+        <div className="mt-2 flex items-center justify-between text-[11px] text-text-tertiary">
           <span>Comfort zone</span>
           <span>Adventurous</span>
         </div>
       </div>
 
-      {recentlyPlayed.length > 0 ? (
-        <div className="flex flex-col gap-2.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            Because you&apos;ve been playing
-          </span>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            {recentlyPlayed.slice(0, 4).map((track) => (
-              <div key={track.id} className="flex flex-col">
-                <span className="text-sm font-medium text-text-primary">{track.title}</span>
-                <span className="text-xs text-text-tertiary">
-                  {track.artist} · {formatRelativeTime(track.playedAt)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <RecentlyPlayedRow tracks={recentlyPlayed} />
 
       <button
         type="button"
         onClick={handleSubmit}
         disabled={isGenerating}
         className={cn(
-          "flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand-green text-sm font-bold text-black transition-colors hover:bg-brand-green-bright disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit sm:px-8"
+          "flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-green text-sm font-bold text-black transition-all duration-150 hover:scale-[1.01] hover:bg-brand-green-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 sm:w-fit sm:px-10"
         )}
       >
         {isGenerating ? (
@@ -215,7 +203,7 @@ export function DiscoveryCompanion({
           </>
         ) : (
           <>
-            <Sparkles className="size-4" />
+            <Sparkles className="size-4" strokeWidth={2} />
             Generate my discovery journey
           </>
         )}

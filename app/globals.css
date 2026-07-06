@@ -88,7 +88,7 @@
   --surface-3: #282828;
   --text-primary: #ffffff;
   --text-secondary: #b3b3b3;
-  --text-tertiary: #8a8a8a;
+  --text-tertiary: #6a6a6a;
 
   --brand-green: #1db954;
   --brand-green-bright: #1ed760;
@@ -155,4 +155,43 @@
 /* Tabular figures for metric/stat callouts — numbers should not jitter in width. */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Discover flow — shared typography, surfaces, and interaction primitives */
+@layer components {
+  .discover-overline {
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em];
+  }
+
+  .discover-overline-muted {
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary;
+  }
+
+  .discover-overline-accent {
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-brand-green;
+  }
+
+  .discover-card {
+    @apply rounded-lg bg-surface-2 p-5 transition-colors duration-200;
+  }
+
+  .discover-card-interactive {
+    @apply rounded-lg bg-surface-2 p-5 transition-colors duration-200 hover:bg-surface-3/80;
+  }
+
+  .discover-chip {
+    @apply inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-3 text-xs font-semibold transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .discover-chip-rest {
+    @apply inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-3 text-xs font-semibold transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background bg-surface-3 text-text-secondary hover:bg-surface-3/90 hover:text-text-primary;
+  }
+
+  .discover-chip-active {
+    @apply inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-3 text-xs font-semibold transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background bg-brand-green text-black;
+  }
+
+  .discover-section-gap {
+    @apply flex flex-col gap-6;
+  }
 }

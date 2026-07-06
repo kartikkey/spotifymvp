@@ -21,10 +21,10 @@ export function FilterChip({ label, active, onClick, className }: FilterChipProp
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-semibold transition-colors",
+        "inline-flex h-7 shrink-0 items-center rounded-full px-3 text-xs font-semibold transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         active
           ? "bg-brand-green text-black"
-          : "bg-surface-3 text-text-secondary hover:text-text-primary",
+          : "bg-surface-3 text-text-secondary hover:bg-surface-3/90 hover:text-text-primary",
         className
       )}
     >

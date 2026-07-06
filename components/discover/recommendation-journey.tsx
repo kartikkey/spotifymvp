@@ -29,57 +29,72 @@ export function RecommendationJourney({
   onReset,
 }: RecommendationJourneyProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <SectionHeader
-        eyebrow="Explore"
-        title="Your Discovery Journey"
-        action={
-          <button
-            type="button"
-            onClick={onReset}
-            className="flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary"
-          >
-            <RotateCcw className="size-3.5" />
-            Start over
-          </button>
-        }
-      />
-      <p className="-mt-2 text-sm text-text-secondary">{journey.promptSummary}</p>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <SectionHeader
+          eyebrow="Explore"
+          title="Your Discovery Journey"
+          action={
+            <button
+              type="button"
+              onClick={onReset}
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-2 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40"
+            >
+              <RotateCcw className="size-3.5" />
+              Start over
+            </button>
+          }
+        />
+        <p className="-mt-2 text-sm leading-relaxed text-text-secondary">{journey.promptSummary}</p>
+      </div>
 
-      <div className="flex flex-col">
-        {journey.tracks.map((track, index) => (
-          <motion.div
-            key={track.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: index * 0.12, ease: "easeOut" }}
-            className="flex gap-4"
-          >
-            <div className="flex flex-col items-center">
-              <div
-                className={cn(
-                  "flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-                  index === 0 ? "bg-brand-green text-black" : "bg-surface-3 text-text-primary"
-                )}
-              >
-                {index + 1}
+      <div className="flex flex-col" role="list">
+        {journey.tracks.map((track, index) => {
+          const isActive = index === 0 || playingTrackId === track.id;
+          return (
+            <motion.div
+              key={track.id}
+              role="listitem"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1, ease: [0.4, 0, 0.2, 1] }}
+              className="flex gap-4"
+            >
+              <div className="flex flex-col items-center pt-1">
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 + 0.1 }}
+                  className={cn(
+                    "flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors duration-300",
+                    isActive ? "bg-brand-green text-black" : "bg-surface-3 text-text-secondary"
+                  )}
+                >
+                  {index + 1}
+                </motion.div>
+                {index < journey.tracks.length - 1 ? (
+                  <motion.div
+                    className="my-1.5 w-px flex-1 origin-top bg-border"
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: 1 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 + 0.2, ease: "easeOut" }}
+                    aria-hidden
+                  />
+                ) : null}
               </div>
-              {index < journey.tracks.length - 1 ? (
-                <div className="my-1 w-px flex-1 bg-border" aria-hidden />
-              ) : null}
-            </div>
-            <RecommendationCard
-              track={track}
-              isPlaying={playingTrackId === track.id}
-              onTogglePreview={() => onTogglePreview(track.id)}
-              isSaved={savedTrackIds.has(track.id)}
-              onToggleSave={() => onToggleSave(track.id)}
-              feedbackGiven={feedbackByTrack[track.id] ?? []}
-              onFeedback={(type) => onFeedback(track.id, type)}
-              className="mb-6 flex-1"
-            />
-          </motion.div>
-        ))}
+              <RecommendationCard
+                track={track}
+                isPlaying={playingTrackId === track.id}
+                onTogglePreview={() => onTogglePreview(track.id)}
+                isSaved={savedTrackIds.has(track.id)}
+                onToggleSave={() => onToggleSave(track.id)}
+                feedbackGiven={feedbackByTrack[track.id] ?? []}
+                onFeedback={(type) => onFeedback(track.id, type)}
+                className="mb-6 flex-1"
+              />
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

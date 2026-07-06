@@ -17,9 +17,7 @@ export function SectionHeader({ eyebrow, title, action, className }: SectionHead
     <div className={cn("mb-4 flex items-end justify-between gap-4", className)}>
       <div className="flex flex-col gap-1">
         {eyebrow ? (
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            {eyebrow}
-          </span>
+          <span className="discover-overline-muted">{eyebrow}</span>
         ) : null}
         <h2 className="text-lg font-bold text-text-primary sm:text-xl">{title}</h2>
       </div>
