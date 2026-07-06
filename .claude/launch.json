@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "dev",
-      "runtimeExecutable": "C:\\Users\\91964\\AppData\\Local\\Temp\\claude\\D--Projects-spotify-mvp\\78939c46-af08-438a-80c3-17a28a2af643\\scratchpad\\dev.cmd",
+      "runtimeExecutable": "C:\\Users\\91964\\AppData\\Local\\Temp\\claude\\D--Projects-spotify-mvp\\f7c7a4db-ccaa-4f12-8aa8-e43b3f5a037d\\scratchpad\\dev.cmd",
       "runtimeArgs": [],
       "port": 3000,
       "autoPort": true

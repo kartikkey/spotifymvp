@@ -75,6 +75,7 @@ export interface DiscoveryTrack {
   stage: RecommendationStage;
   trackTitle: string;
   artist: string;
+  artworkUrl: string;
   genre: string;
   year: number;
   tags: string[];
@@ -168,6 +169,7 @@ export interface RecentlyPlayedTrack {
   id: string;
   title: string;
   artist: string;
+  artworkUrl: string;
   playedAt: string;
 }
 
@@ -187,6 +189,7 @@ export interface PreferredGenre {
 export interface DiscoveredArtist {
   artist: string;
   genre: string;
+  artworkUrl: string;
   discoveredAt: string;
 }
 

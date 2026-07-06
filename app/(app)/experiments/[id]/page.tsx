@@ -9,12 +9,8 @@ import { ExperimentStatusPill } from "@/components/shared/status-pill";
 import { SectionHeader } from "@/components/shared/section-header";
 import { ComparisonAreaChart } from "@/components/charts/comparison-area-chart";
 
-export default async function ExperimentDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default async function ExperimentDetailPage(props: PageProps<"/experiments/[id]">) {
+  const [{ id }] = await Promise.all([props.params, props.searchParams]);
   const experiment = await getExperimentById(id);
   if (!experiment) notFound();
 

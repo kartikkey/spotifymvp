@@ -23,7 +23,14 @@ export function DiscoverPlayerBar() {
   return (
     <footer className="flex h-[72px] shrink-0 items-center gap-4 border-t border-border bg-surface-1 px-4 sm:px-6">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <TrackArtwork stage={track.stage} artist={track.artist} isPlaying={isPlaying} className="size-12" />
+        <TrackArtwork
+          stage={track.stage}
+          artist={track.artist}
+          artworkUrl={track.artworkUrl}
+          alt={`${track.trackTitle} by ${track.artist}`}
+          isPlaying={isPlaying}
+          className="size-12"
+        />
         <div className="min-w-0 flex-col gap-0.5 hidden sm:flex">
           <span className="truncate text-sm font-medium text-text-primary">{track.trackTitle}</span>
           <span className="truncate text-xs text-text-secondary">{track.artist}</span>

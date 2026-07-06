@@ -116,7 +116,7 @@ export function DiscoverExperience({
           ? prevProfile.recentlyDiscovered
           : [
               ...prevProfile.recentlyDiscovered,
-              { artist: track.artist, genre: track.genre, discoveredAt: new Date().toISOString() },
+              { artist: track.artist, genre: track.genre, artworkUrl: track.artworkUrl, discoveredAt: new Date().toISOString() },
             ],
         discoveryStreak: hasBumpedStreak.current
           ? prevProfile.discoveryStreak

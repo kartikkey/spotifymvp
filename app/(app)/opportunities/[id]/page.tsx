@@ -12,12 +12,8 @@ import { SectionHeader } from "@/components/shared/section-header";
 import { RiceBreakdown } from "@/components/opportunities/rice-breakdown";
 import { ActivityTimeline } from "@/components/opportunities/activity-timeline";
 
-export default async function OpportunityDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default async function OpportunityDetailPage(props: PageProps<"/opportunities/[id]">) {
+  const [{ id }] = await Promise.all([props.params, props.searchParams]);
   const opportunity = await getOpportunityById(id);
   if (!opportunity) notFound();
 

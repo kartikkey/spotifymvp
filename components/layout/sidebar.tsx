@@ -85,6 +85,8 @@ export function Sidebar() {
             <TrackArtwork
               stage={nowPlaying.track.stage}
               artist={nowPlaying.track.artist}
+              artworkUrl={nowPlaying.track.artworkUrl}
+              alt={`${nowPlaying.track.trackTitle} by ${nowPlaying.track.artist}`}
               isPlaying={isPlaying}
               className="size-11"
             />

@@ -6,6 +6,7 @@ import type {
   RecentlyPlayedTrack,
   SuggestedPrompt,
 } from "@/lib/types";
+import { DISCOVERY_ARTWORK } from "./discovery-artwork";
 
 /**
  * Mock catalog backing the /discover experience. A real implementation would
@@ -15,11 +16,11 @@ import type {
  */
 
 export const RECENTLY_PLAYED: RecentlyPlayedTrack[] = [
-  { id: "rp-01", title: "Sofia", artist: "Clairo", playedAt: "2026-07-06T08:12:00Z" },
-  { id: "rp-02", title: "Bad Habit", artist: "Steve Lacy", playedAt: "2026-07-05T22:40:00Z" },
-  { id: "rp-03", title: "Not Strong Enough", artist: "boygenius", playedAt: "2026-07-05T19:05:00Z" },
-  { id: "rp-04", title: "Evergreen", artist: "Omar Apollo", playedAt: "2026-07-04T14:30:00Z" },
-  { id: "rp-05", title: "Kokoro", artist: "Rina Sawayama", playedAt: "2026-07-03T21:15:00Z" },
+  { id: "rp-01", title: "Sofia", artist: "Clairo", artworkUrl: DISCOVERY_ARTWORK["rp-01"], playedAt: "2026-07-06T08:12:00Z" },
+  { id: "rp-02", title: "Bad Habit", artist: "Steve Lacy", artworkUrl: DISCOVERY_ARTWORK["rp-02"], playedAt: "2026-07-05T22:40:00Z" },
+  { id: "rp-03", title: "Not Strong Enough", artist: "boygenius", artworkUrl: DISCOVERY_ARTWORK["rp-03"], playedAt: "2026-07-05T19:05:00Z" },
+  { id: "rp-04", title: "Evergreen", artist: "Omar Apollo", artworkUrl: DISCOVERY_ARTWORK["rp-04"], playedAt: "2026-07-04T14:30:00Z" },
+  { id: "rp-05", title: "Kokoro", artist: "Rina Sawayama", artworkUrl: DISCOVERY_ARTWORK["rp-05"], playedAt: "2026-07-03T21:15:00Z" },
 ];
 
 export const SUGGESTED_PROMPTS: SuggestedPrompt[] = [
@@ -55,7 +56,7 @@ export const SUGGESTED_PROMPTS: SuggestedPrompt[] = [
   },
 ];
 
-export const DISCOVERY_TRACKS: DiscoveryTrack[] = [
+export const DISCOVERY_TRACK_SEEDS: Omit<DiscoveryTrack, "artworkUrl">[] = [
   // Current Taste
   {
     id: "dt-01",
@@ -407,6 +408,11 @@ export const DISCOVERY_TRACKS: DiscoveryTrack[] = [
   },
 ];
 
+export const DISCOVERY_TRACKS: DiscoveryTrack[] = DISCOVERY_TRACK_SEEDS.map((track) => ({
+  ...track,
+  artworkUrl: DISCOVERY_ARTWORK[track.id],
+}));
+
 export const INITIAL_DISCOVERY_PROFILE: DiscoveryProfile = {
   preferredGenres: [
     { genre: "Bedroom Pop", weight: 82, accent: "blue" },
@@ -417,8 +423,8 @@ export const INITIAL_DISCOVERY_PROFILE: DiscoveryProfile = {
   currentMood: "Chill",
   explorationLevel: 45,
   recentlyDiscovered: [
-    { artist: "Ravyn Lenae", genre: "Neo-Soul", discoveredAt: "2026-06-18T00:00:00Z" },
-    { artist: "Fousheé", genre: "Alt R&B / Punk", discoveredAt: "2026-06-27T00:00:00Z" },
+    { artist: "Ravyn Lenae", genre: "Neo-Soul", artworkUrl: DISCOVERY_ARTWORK["Ravyn Lenae"], discoveredAt: "2026-06-18T00:00:00Z" },
+    { artist: "Fousheé", genre: "Alt R&B / Punk", artworkUrl: DISCOVERY_ARTWORK["Fousheé"], discoveredAt: "2026-06-27T00:00:00Z" },
   ],
   discoveryStreak: 6,
   comfortVsExploration: { comfort: 64, exploration: 36 },

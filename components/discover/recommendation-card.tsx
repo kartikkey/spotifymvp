@@ -62,6 +62,8 @@ export function RecommendationCard({
         <TrackArtwork
           stage={track.stage}
           artist={track.artist}
+          artworkUrl={track.artworkUrl}
+          alt={`${track.trackTitle} by ${track.artist}`}
           isPlaying={isPlaying}
           className="size-[72px] sm:size-28"
         />

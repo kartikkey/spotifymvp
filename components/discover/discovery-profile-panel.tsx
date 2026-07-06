@@ -116,6 +116,7 @@ export function DiscoveryProfilePanel({ profile, className }: DiscoveryProfilePa
                   <TrackArtwork
                     stage={RECOMMENDATION_STAGES[i % RECOMMENDATION_STAGES.length]}
                     artist={entry.artist}
+                    artworkUrl={entry.artworkUrl}
                     className="size-10"
                   />
                   <div className="flex min-w-0 flex-1 flex-col">

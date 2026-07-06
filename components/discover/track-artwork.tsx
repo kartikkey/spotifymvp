@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Music } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,13 +10,23 @@ import { RECOMMENDATION_STAGE_ARTWORK, type RecommendationStage } from "@/lib/ty
 interface TrackArtworkProps {
   stage: RecommendationStage;
   artist?: string;
+  artworkUrl?: string;
+  alt?: string;
   isPlaying?: boolean;
   className?: string;
 }
 
-export function TrackArtwork({ stage, artist, isPlaying, className }: TrackArtworkProps) {
+export function TrackArtwork({
+  stage,
+  artist,
+  artworkUrl,
+  alt,
+  isPlaying,
+  className,
+}: TrackArtworkProps) {
   const [from, to] = RECOMMENDATION_STAGE_ARTWORK[stage];
   const initial = artist?.charAt(0).toUpperCase() ?? null;
+  const imageAlt = alt ?? (artist ? `${artist} artwork` : "Track artwork");
 
   return (
     <div
@@ -24,11 +35,23 @@ export function TrackArtwork({ stage, artist, isPlaying, className }: TrackArtwo
         isPlaying && "ring-2 ring-brand-green/50",
         className
       )}
-      style={{
-        background: `linear-gradient(145deg, ${ACCENT_COLOR_VAR[from]} 0%, ${ACCENT_COLOR_VAR[to]} 100%)`,
-      }}
+      style={
+        artworkUrl
+          ? undefined
+          : {
+              background: `linear-gradient(145deg, ${ACCENT_COLOR_VAR[from]} 0%, ${ACCENT_COLOR_VAR[to]} 100%)`,
+            }
+      }
     >
-      {initial ? (
+      {artworkUrl ? (
+        <Image
+          src={artworkUrl}
+          alt={imageAlt}
+          fill
+          sizes="(max-width: 640px) 160px, 192px"
+          className="object-cover"
+        />
+      ) : initial ? (
         <span className="text-2xl font-bold text-black/25 sm:text-3xl">{initial}</span>
       ) : (
         <Music className="size-1/3 text-black/30" strokeWidth={1.75} />
